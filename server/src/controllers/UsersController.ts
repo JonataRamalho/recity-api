@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 
 import db from "../database/connection";
-
-let insertedUsersIds: number[] = [];
+import { saveUserId } from "../utils/getUserId";
 
 export default class UsersController {
   async create(request: Request, response: Response) {
@@ -26,7 +25,7 @@ export default class UsersController {
 
       const district_id = insertedDistrictIds[0];
 
-      insertedUsersIds = await trx("users").insert({
+      const insertedUsersIds = await trx("users").insert({
         name,
         picture,
         cpf,
@@ -36,6 +35,8 @@ export default class UsersController {
         email,
         district_id,
       });
+
+      saveUserId(insertedUsersIds[0]);
 
       await trx.commit();
 
