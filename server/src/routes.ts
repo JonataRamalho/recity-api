@@ -1,115 +1,18 @@
-import db from "./database/connection";
+import CompaniesController from "./controllers/CompaniesController";
+import UsersController from "./controllers/UsersController";
+import WasteController from "./controllers/WasteController";
 import express from "express";
 
 const routes = express.Router();
 
-let insertedUsersIds: number[] = [];
+const usersController = new UsersController();
+const companiesController = new CompaniesController();
+const wasteController = new WasteController();
 
-routes.post("/users", async (request, response) => {
-  const {
-    name,
-    picture,
-    cpf,
-    phone,
-    login,
-    password,
-    email,
-    cep,
-  } = request.body;
+routes.post("/users", usersController.create);
 
-  const trx = await db.transaction();
+routes.post("/waste", wasteController.create);
 
-  try {
-    const insertedDistrictIds = await trx("district").insert({
-      cep,
-    });
-
-    const district_id = insertedDistrictIds[0];
-
-    insertedUsersIds = await trx("users").insert({
-      name,
-      picture,
-      cpf,
-      phone,
-      login,
-      password,
-      email,
-      district_id,
-    });
-
-    await trx.commit();
-
-    return response.status(201).send();
-  } catch (err) {
-    await trx.rollback();
-
-    return response.status(400).json({
-      error: "Erro inesperado ao criar um usuário",
-    });
-  }
-});
-
-routes.post("/waste", async (request, response) => {
-  const { name, picture, description, type, quantity } = request.body;
-
-  const trx = await db.transaction();
-
-  const insertedTypesIds = await trx("types").insert({
-    name: type,
-  });
-
-  const insertedAmountsIds = await trx("amounts").insert({
-    quantity,
-  });
-
-  const types_id = insertedTypesIds[0];
-  const amounts_id = insertedAmountsIds[0];
-
-  const insertedWasteIds = await trx("waste").insert({
-    name,
-    picture,
-    description,
-    types_id,
-    amounts_id,
-  });
-
-  const users_id = insertedUsersIds[0];
-  const waste_id = insertedWasteIds[0];
-
-  await trx("users_waste").insert({
-    users_id,
-    waste_id,
-  });
-
-  await trx.commit();
-
-  return response.send();
-});
-
-routes.post("/companies", async (request, response) => {
-  const { name, picture, cnpj, description, phone, email, cep } = request.body;
-
-  const trx = await db.transaction();
-
-  const insertedDistrictIds = await trx("district").insert({
-    cep,
-  });
-
-  const district_id = insertedDistrictIds[0];
-
-  await trx("companies").insert({
-    name,
-    picture,
-    cnpj,
-    description,
-    phone,
-    email,
-    district_id,
-  });
-
-  await trx.commit();
-
-  return response.send();
-});
+routes.post("/companies", companiesController.create);
 
 export default routes;
