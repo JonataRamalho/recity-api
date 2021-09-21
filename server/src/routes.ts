@@ -1,133 +1,45 @@
-import db from "./database/connection";
+import UsersController from "./controllers/UsersController";
 import express from "express";
 
 const routes = express.Router();
+const usersController = new UsersController();
 
-let insertedUsersIds: number[] = [];
+routes.post("/users", usersController.create);
 
-routes.post("/users", async (request, response) => {
-  const {
-    name,
-    picture,
-    cpf,
-    phone,
-    login,
-    password,
-    email,
-    cep,
-  } = request.body;
+routes.post("/waste");
 
-  const trx = await db.transaction();
+// routes.post("/companies", async (request, response) => {
+//   const { name, picture, cnpj, description, phone, email, cep } = request.body;
 
-  try {
-    const insertedDistrictIds = await trx("district").insert({
-      cep,
-    });
+//   const trx = await db.transaction();
 
-    const district_id = insertedDistrictIds[0];
+//   try {
+//     const insertedDistrictIds = await trx("district").insert({
+//       cep,
+//     });
 
-    insertedUsersIds = await trx("users").insert({
-      name,
-      picture,
-      cpf,
-      phone,
-      login,
-      password,
-      email,
-      district_id,
-    });
+//     const district_id = insertedDistrictIds[0];
 
-    await trx.commit();
+//     await trx("companies").insert({
+//       name,
+//       picture,
+//       cnpj,
+//       description,
+//       phone,
+//       email,
+//       district_id,
+//     });
 
-    return response.status(201).send();
-  } catch (err) {
-    await trx.rollback();
+//     await trx.commit();
 
-    return response.status(400).json({
-      error: "Erro inesperado ao criar um usuário",
-    });
-  }
-});
+//     return response.status(201).send();
+//   } catch (err) {
+//     await trx.rollback();
 
-routes.post("/waste", async (request, response) => {
-  const { name, picture, description, type, quantity } = request.body;
-
-  const trx = await db.transaction();
-
-  try {
-    const insertedTypesIds = await trx("types").insert({
-      name: type,
-    });
-
-    const insertedAmountsIds = await trx("amounts").insert({
-      quantity,
-    });
-
-    const types_id = insertedTypesIds[0];
-    const amounts_id = insertedAmountsIds[0];
-
-    const insertedWasteIds = await trx("waste").insert({
-      name,
-      picture,
-      description,
-      types_id,
-      amounts_id,
-    });
-
-    const users_id = insertedUsersIds[0];
-    const waste_id = insertedWasteIds[0];
-
-    await trx("users_waste").insert({
-      users_id,
-      waste_id,
-    });
-
-    await trx.commit();
-
-    return response.status(201).send();
-  } catch (err) {
-    await trx.rollback();
-
-    // console.log(err);
-
-    return response.status(400).json({
-      error: "Erro inesperado ao adicionar o resíduo",
-    });
-  }
-});
-
-routes.post("/companies", async (request, response) => {
-  const { name, picture, cnpj, description, phone, email, cep } = request.body;
-
-  const trx = await db.transaction();
-
-  try {
-    const insertedDistrictIds = await trx("district").insert({
-      cep,
-    });
-
-    const district_id = insertedDistrictIds[0];
-
-    await trx("companies").insert({
-      name,
-      picture,
-      cnpj,
-      description,
-      phone,
-      email,
-      district_id,
-    });
-
-    await trx.commit();
-
-    return response.status(201).send();
-  } catch (err) {
-    await trx.rollback();
-
-    return response.status(400).json({
-      error: "Erro inesperado ao adicionar a empresa ou local",
-    });
-  }
-});
+//     return response.status(400).json({
+//       error: "Erro inesperado ao adicionar a empresa ou local",
+//     });
+//   }
+// });
 
 export default routes;
