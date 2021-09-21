@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 
 import db from "../database/connection";
+import { getUserId } from "../utils/getUserId";
 
 export default class WasteController {
   async create(request: Request, response: Response) {
@@ -28,7 +29,7 @@ export default class WasteController {
         amounts_id,
       });
 
-      // const users_id = insertedUsersIds[0]; Analisar essa parte
+      const users_id = getUserId();
       const waste_id = insertedWasteIds[0];
 
       await trx("users_waste").insert({
