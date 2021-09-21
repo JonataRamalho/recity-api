@@ -1,45 +1,18 @@
+import CompaniesController from "./controllers/CompaniesController";
 import UsersController from "./controllers/UsersController";
+import WasteController from "./controllers/WasteController";
 import express from "express";
 
 const routes = express.Router();
+
 const usersController = new UsersController();
+const companiesController = new CompaniesController();
+const wasteController = new WasteController();
 
 routes.post("/users", usersController.create);
 
-routes.post("/waste");
+routes.post("/waste", wasteController.create);
 
-// routes.post("/companies", async (request, response) => {
-//   const { name, picture, cnpj, description, phone, email, cep } = request.body;
-
-//   const trx = await db.transaction();
-
-//   try {
-//     const insertedDistrictIds = await trx("district").insert({
-//       cep,
-//     });
-
-//     const district_id = insertedDistrictIds[0];
-
-//     await trx("companies").insert({
-//       name,
-//       picture,
-//       cnpj,
-//       description,
-//       phone,
-//       email,
-//       district_id,
-//     });
-
-//     await trx.commit();
-
-//     return response.status(201).send();
-//   } catch (err) {
-//     await trx.rollback();
-
-//     return response.status(400).json({
-//       error: "Erro inesperado ao adicionar a empresa ou local",
-//     });
-//   }
-// });
+routes.post("/companies", companiesController.create);
 
 export default routes;
