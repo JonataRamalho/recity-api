@@ -4,6 +4,24 @@ import db from "../database/connection";
 import { saveUserId } from "../utils/getUserId";
 
 export default class UsersController {
+  async index(request: Request, response: Response) {
+    const filters = request.query;
+
+    if (!filters.login || !filters.password) {
+      return response.status(400).json({
+        error: "Informações não encontradas",
+      });
+    }
+
+    const users = await db("users")
+      .where("users.login", filters.login as string)
+      .select("id");
+
+    saveUserId(users[0].id);
+
+    return response.status(200).send();
+  }
+
   async create(request: Request, response: Response) {
     const {
       name,
