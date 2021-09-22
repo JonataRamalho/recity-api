@@ -10,6 +10,7 @@ const companiesController = new CompaniesController();
 const wasteController = new WasteController();
 
 routes.post("/users", usersController.create);
+routes.get("/users", usersController.index);
 
 routes.post("/waste", wasteController.create);
 
